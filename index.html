@@ -121,8 +121,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   <section class="plan" aria-live="polite">
     <span class="lab">朝の流れ</span>
     <div class="track" id="track">
-      <div class="step light"><span class="tm">7:50</span><span class="what">暖色でふわっと点灯</span></div>
-      <div class="step ring"><span class="tm">8:00</span><span class="what">アラーム1・光が最大に</span></div>
+      <div class="step light"><span class="tm">7:50</span><span class="what">点灯</span></div>
+      <div class="step ring"><span class="tm">8:00</span><span class="what">アラーム</span></div>
     </div>
   </section>
 
@@ -164,9 +164,9 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     for(let i=0;i<state.count;i++){ const x = new Date(b); x.setMinutes(x.getMinutes()+i*state.gap); times.push(x); }
     const ls = new Date(b); ls.setMinutes(ls.getMinutes()-10);
 
-    let html = '<div class="step light"><span class="tm">'+hm(ls)+'</span><span class="what">暖色でふわっと点灯</span></div>';
+    let html = '<div class="step light"><span class="tm">'+hm(ls)+'</span><span class="what">点灯</span></div>';
     times.forEach((x,i) => {
-      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">アラーム'+(i+1)+(i===0?'・光が最大に':'')+'</span></div>';
+      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">アラーム</span></div>';
     });
     $("track").innerHTML = html;
 
