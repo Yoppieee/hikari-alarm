@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="光アラーム">
+<title>光アラーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* 夜明け前の空から朝の光へ。縦1列、上に時刻、下にセットボタン */
+:root{
+  --sky:#eef1f7; --panel:#ffffff; --ink:#1d2333; --mute:#6a7085; --line:#d9dde8;
+  --dawn:#e48a3c; --dawn-soft:#fbe7d4; --on-dawn:#ffffff;
+  --digit:"Chivo Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --body:"Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky:#121626; --panel:#1b2033; --ink:#eef0f7; --mute:#9aa0b8; --line:#2c3350;
+  --dawn:#f0a259; --dawn-soft:#3a2c25; --on-dawn:#1a1206; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --sky:#121626; --panel:#1b2033; --ink:#eef0f7; --mute:#9aa0b8; --line:#2c3350;
+  --dawn:#f0a259; --dawn-soft:#3a2c25; --on-dawn:#1a1206; color-scheme:dark }
+
+html,body{height:100%}
+body{background:var(--sky);color:var(--ink);font-family:var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));margin:0;font-size:14px}
+[hidden]{display:none!important}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.horizon{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--line),var(--dawn-soft) 45%,var(--dawn))}
+h1{margin:0;font-size:15px;font-weight:500;letter-spacing:.08em;color:var(--mute)}
+
+.clock{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px 20px 18px;display:flex;flex-direction:column;gap:14px}
+.days{display:flex;gap:8px}
+.chip{flex:1;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:9px 0;font:500 14px var(--body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.timebox{position:relative;text-align:center}
+#t{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--ink);
+  font:300 clamp(64px,22vw,96px)/1 var(--digit);text-align:center;width:100%;padding:4px 0;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+#t::-webkit-date-and-time-value{text-align:center}
+#t:focus-visible{outline:2px solid var(--dawn);outline-offset:4px;border-radius:12px}
+.datel{text-align:center;color:var(--mute);font-size:14px}
+
+.row{display:flex;flex-direction:column;gap:8px}
+.lab{font-size:13px;color:var(--mute);letter-spacing:.06em}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--sky);padding:4px;border-radius:14px}
+.seg button{border:0;background:transparent;color:var(--ink);border-radius:10px;padding:10px 0;font:500 15px var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 3px rgb(0 0 0 / .12)}
+.seg button:disabled{opacity:.35;cursor:default}
+.seg button:focus-visible,.chip:focus-visible,.go:focus-visible{outline:2px solid var(--dawn);outline-offset:2px}
+
+.plan{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.line{display:flex;align-items:baseline;gap:12px}
+.line .k{width:4.5em;flex:none;font-size:13px;color:var(--mute)}
+.line .v{font:500 18px var(--digit);font-variant-numeric:tabular-nums;display:flex;gap:14px;flex-wrap:wrap}
+.light .v{color:var(--dawn)}
+
+.go{display:block;text-align:center;text-decoration:none;background:var(--dawn);color:var(--on-dawn);
+  border-radius:18px;padding:18px 0;font:700 18px var(--body);letter-spacing:.1em}
+.go:active{transform:scale(.99)}
+.note{font-size:12px;color:var(--mute);line-height:1.7;margin:0}
+.note code{font-family:var(--digit);font-size:11px;word-break:break-all;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.go:active{transform:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="horizon" aria-hidden="true"></div>
+  <h1>光アラーム</h1>
+
+  <section class="clock">
+    <div class="days" role="group" aria-label="日付">
+      <button class="chip" id="d0" type="button" aria-pressed="false">今日</button>
+      <button class="chip" id="d1" type="button" aria-pressed="true">明日</button>
+    </div>
+    <div class="timebox">
+      <label for="t" class="lab" hidden>1回目の時刻</label>
+      <input id="t" type="time" value="08:00" step="300">
+    </div>
+    <div class="datel" id="datel">10月29日(木)</div>
+
+    <div class="row">
+      <span class="lab">回数</span>
+      <div class="seg" id="cnt" role="group" aria-label="回数">
+        <button type="button" data-v="1">1回</button>
+        <button type="button" data-v="2">2回</button>
+        <button type="button" data-v="3" aria-pressed="true">3回</button>
+      </div>
+    </div>
+    <div class="row">
+      <span class="lab">間隔</span>
+      <div class="seg" id="gap" role="group" aria-label="間隔">
+        <button type="button" data-v="5">5分</button>
+        <button type="button" data-v="10" aria-pressed="true">10分</button>
+        <button type="button" data-v="15">15分</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="plan" aria-live="polite">
+    <div class="line light"><span class="k">光</span><span class="v" id="pl">7:50 → 8:00</span></div>
+    <div class="line"><span class="k">アラーム</span><span class="v" id="pa"><span>8:00</span><span>8:10</span><span>8:20</span></span></div>
+  </section>
+
+  <a class="go" id="go" href="#">セット</a>
+
+  <p class="note">セットを押すとショートカット「光アラームセット(手動)」が起動し、Googleカレンダーへの予定追加、アラーム、光の予約までまとめて行います。初回は「"ショートカット"で開きますか？」と聞かれるので「開く」を選んでください。</p>
+</div>
+
+<script>
+(function(){
+  const SC = "光アラームセット(手動)";
+  const W = ["日","月","火","水","木","金","土"];
+  const $ = id => document.getElementById(id);
+  const t = $("t"), d0 = $("d0"), d1 = $("d1");
+  let state = {day:1, count:3, gap:10, time:"08:00"};
+  try{ const s = JSON.parse(localStorage.getItem("hikari-alarm")||"null"); if(s){ state.count=s.count||3; state.gap=s.gap||10; state.time=s.time||"08:00"; } }catch(e){}
+  t.value = state.time;
+
+  function pick(group, v){
+    group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.v === v)));
+  }
+  function base(){
+    const [h,m] = (t.value||"08:00").split(":").map(Number);
+    const d = new Date(); d.setSeconds(0,0); d.setHours(h,m);
+    d.setDate(d.getDate()+state.day);
+    return d;
+  }
+  function hm(d){ return d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"); }
+  function stamp(d){ return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()+" "+hm(d); }
+
+  function autoDay(){
+    const [h,m] = (t.value||"08:00").split(":").map(Number);
+    const now = new Date(), d = new Date(); d.setHours(h,m,0,0);
+    state.day = d > now ? 0 : 1;
+  }
+
+  function render(){
+    d0.setAttribute("aria-pressed", String(state.day===0));
+    d1.setAttribute("aria-pressed", String(state.day===1));
+    pick($("cnt"), state.count); pick($("gap"), state.gap);
+    $("gap").querySelectorAll("button").forEach(b => b.disabled = state.count===1);
+    const b = base(), times = [];
+    for(let i=0;i<state.count;i++){ const x = new Date(b); x.setMinutes(x.getMinutes()+i*state.gap); times.push(x); }
+    $("datel").textContent = (b.getMonth()+1)+"月"+b.getDate()+"日("+W[b.getDay()]+")";
+    const ls = new Date(b); ls.setMinutes(ls.getMinutes()-10);
+    $("pl").textContent = hm(ls)+" → "+hm(b);
+    $("pa").innerHTML = times.map(x => "<span>"+hm(x)+"</span>").join("");
+    const text = times.map(stamp).join(",");
+    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(text);
+    state.time = t.value;
+    try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:state.time})); }catch(e){}
+  }
+
+  t.addEventListener("input", () => { autoDay(); render(); });
+  d0.addEventListener("click", () => { state.day=0; render(); });
+  d1.addEventListener("click", () => { state.day=1; render(); });
+  $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
+  $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
+
+  autoDay(); render();
+})();
+</script>
+</body>
+</html>
