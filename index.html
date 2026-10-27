@@ -6,16 +6,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="光アラーム">
-<meta name="theme-color" content="#08080a">
+<meta name="theme-color" content="#000000">
 <title>光アラーム</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@200;400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* 夜の黒から、地平線の暖色がにじむ。縦1列、時刻を主役に */
+/* 黒一色。時刻を主役に、光に関わる表示だけ暖色 */
 :root{
-  --night:#08080a; --panel:#111114; --raise:#1a1a1f; --line:#26262d;
+  --night:#000000; --panel:#0e0e10; --raise:#1c1c1f; --line:#232327;
   --ink:#f2efe9; --mute:#8b8792; --faint:#4a4752;
-  --ember:#ff9f4a; --ember-deep:#e0642a; --glow:rgb(255 140 60 / .22);
+  --ember:#ff9f4a;
   --digit:"Chivo Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --body:"Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   color-scheme:dark;
@@ -34,12 +34,7 @@ h1{margin:0;font-size:13px;font-weight:500;letter-spacing:.32em;color:var(--mute
 .now{font:400 12px var(--digit);color:var(--faint);font-variant-numeric:tabular-nums}
 
 /* 時刻のステージ */
-.stage{position:relative;overflow:hidden;border-radius:28px;background:var(--panel);border:1px solid var(--line);
-  padding:22px 20px 26px;display:flex;flex-direction:column;gap:6px;isolation:isolate}
-.stage::before{content:"";position:absolute;left:50%;bottom:-62%;width:150%;aspect-ratio:1;transform:translateX(-50%);
-  background:radial-gradient(closest-side,var(--glow),transparent 70%);z-index:-1;pointer-events:none}
-.stage::after{content:"";position:absolute;left:8%;right:8%;bottom:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--ember),transparent);opacity:.7}
+.stage{border-radius:24px;background:var(--panel);padding:22px 20px 24px;display:flex;flex-direction:column;gap:6px}
 .days{display:flex;gap:6px;align-self:center;background:var(--night);border:1px solid var(--line);border-radius:999px;padding:3px}
 .chip{border:0;background:transparent;color:var(--mute);border-radius:999px;padding:6px 18px;font:500 13px var(--body);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--raise);color:var(--ink)}
@@ -52,7 +47,7 @@ h1{margin:0;font-size:13px;font-weight:500;letter-spacing:.32em;color:var(--mute
 
 /* 設定 */
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.opt{background:var(--panel);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .lab{font-size:11px;color:var(--mute);letter-spacing:.24em;padding-left:4px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .seg button{border:1px solid transparent;background:var(--raise);color:var(--mute);border-radius:12px;padding:9px 0;
@@ -62,25 +57,22 @@ h1{margin:0;font-size:13px;font-weight:500;letter-spacing:.32em;color:var(--mute
 .seg button:disabled{opacity:.3;cursor:default}
 
 /* タイムライン */
-.plan{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px 18px 18px}
+.plan{background:var(--panel);border-radius:20px;padding:16px 18px 18px}
 .plan .lab{display:block;margin-bottom:12px}
 .track{position:relative;display:flex;flex-direction:column;gap:12px;padding-left:22px}
-.track::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;
-  background:linear-gradient(var(--ember),var(--faint))}
+.track::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line)}
 .step{position:relative;display:flex;align-items:baseline;gap:12px}
 .step::before{content:"";position:absolute;left:-21px;top:50%;width:9px;height:9px;margin-top:-4px;border-radius:50%;
   background:var(--night);border:1.5px solid var(--faint)}
-.step.light::before{background:var(--ember);border-color:var(--ember);box-shadow:0 0 12px var(--ember)}
+.step.light::before{background:var(--ember);border-color:var(--ember)}
 .step.ring::before{border-color:var(--ink)}
 .step .tm{font:500 19px var(--digit);font-variant-numeric:tabular-nums;min-width:4.2em}
 .step.light .tm{color:var(--ember)}
 .step .what{font-size:12px;color:var(--mute)}
 
 /* セット */
-.go{position:relative;display:block;text-align:center;text-decoration:none;border-radius:22px;padding:19px 0;
-  font:700 17px var(--body);letter-spacing:.4em;text-indent:.4em;color:#1a0d04;
-  background:linear-gradient(180deg,var(--ember),var(--ember-deep));
-  box-shadow:0 10px 34px -10px rgb(255 120 40 / .65), inset 0 1px 0 rgb(255 255 255 / .35)}
+.go{display:block;text-align:center;text-decoration:none;border-radius:20px;padding:18px 0;
+  font:700 17px var(--body);letter-spacing:.4em;text-indent:.4em;color:var(--night);background:var(--ink)}
 .go:active{transform:translateY(1px) scale(.995)}
 .note{margin:0;font-size:11.5px;color:var(--faint);line-height:1.8}
 
