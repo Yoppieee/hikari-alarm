@@ -91,10 +91,6 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   </header>
 
   <section class="stage" aria-label="1回目の時刻">
-    <div class="days" role="group" aria-label="日付">
-      <button class="chip" id="d0" type="button" aria-pressed="false">今日</button>
-      <button class="chip" id="d1" type="button" aria-pressed="true">明日</button>
-    </div>
     <input id="t" type="time" value="08:00" step="300" aria-label="1回目の時刻">
     <div class="datel" id="datel">10月29日(木)</div>
   </section>
@@ -136,7 +132,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   const SC = "光アラームセット(手動)";
   const W = ["日","月","火","水","木","金","土"];
   const $ = id => document.getElementById(id);
-  const t = $("t"), d0 = $("d0"), d1 = $("d1");
+  const t = $("t");
   const state = {day:1, count:3, gap:10};
   try{ const s = JSON.parse(localStorage.getItem("hikari-alarm")||"null");
        if(s){ state.count = s.count||3; state.gap = s.gap||10; if(s.time) t.value = s.time; } }catch(e){}
@@ -154,8 +150,6 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
 
   function render(){
     const n = new Date(); $("now").textContent = String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
-    d0.setAttribute("aria-pressed", String(state.day===0));
-    d1.setAttribute("aria-pressed", String(state.day===1));
     pick($("cnt"), state.count); pick($("gap"), state.gap);
     $("gap").querySelectorAll("button").forEach(b => b.disabled = state.count===1);
 
@@ -176,8 +170,6 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   }
 
   t.addEventListener("input", () => { autoDay(); render(); });
-  d0.addEventListener("click", () => { state.day=0; render(); });
-  d1.addEventListener("click", () => { state.day=1; render(); });
   $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
   $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
   document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); } });
