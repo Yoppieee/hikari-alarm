@@ -29,7 +29,8 @@ body{margin:0;background:var(--night);color:var(--ink);font:14px/1.6 var(--body)
   padding-block:calc(18px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));
   -webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-.wrap{max-width:430px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+body{min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+.wrap{width:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 
 header{display:flex;align-items:baseline;justify-content:space-between}
 h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--ember)}
@@ -86,7 +87,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
 <body>
 <div class="wrap">
   <header>
-    <h1>光アラーム <small style="font-weight:400;letter-spacing:0;color:var(--faint)">v2</small></h1>
+    <h1>光アラーム</h1>
     <span class="now" id="now">07:54</span>
   </header>
 
@@ -123,8 +124,6 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   </section>
 
   <a class="go" id="go" href="#">セット</a>
-
-  <p class="note">セットでショートカット「光アラームセット(手動)」が起動し、Googleカレンダーへの予定追加、アラーム、光の予約までまとめて行います。外出先でセットした場合、光の予約は帰宅後、夜中3:00の自動実行で入ります。</p>
 </div>
 
 <script>
