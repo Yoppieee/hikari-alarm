@@ -173,7 +173,24 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     $("track").innerHTML = html;
 
     // 起動するだけ(終わったらショートカット側でホーム画面に戻る)
-    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(times.map(stamp).join(","));
+    // 旧ショートカットには時刻のカンマ区切り、新ショートカットには6行の指示書(plan.txtと同じ形式)を渡す
+    let payload;
+    if(SC === "光アラームセット(手動)"){
+      payload = times.map(stamp).join(",");
+    }else{
+      const local = d => d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+"T"+p2(d.getHours())+":"+p2(d.getMinutes())+":00";
+      const fade = new Date(b); fade.setMinutes(fade.getMinutes()-9);
+      const watch = new Date(b); watch.setMinutes(watch.getMinutes()-2);
+      payload = [
+        "起床(手動)",
+        times.map(stamp).join(","),
+        local(ls),
+        local(fade),
+        "手動 "+(b.getMonth()+1)+"/"+b.getDate()+"("+W[b.getDay()]+") "+times.map(hm).join("/")+"・光"+hm(ls),
+        stamp(watch)
+      ].join("\n");
+    }
+    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
 
