@@ -79,6 +79,11 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .go:active{transform:translateY(1px) scale(.995)}
 .note{margin:0;font-size:11.5px;color:var(--faint);line-height:1.8}
 
+/* 結果の表示(ショートカットから戻ってきたとき) */
+.result{border-radius:16px;padding:12px 16px;font-size:14px;font-weight:500;text-align:center;
+  background:var(--ember-dim);color:var(--ember)}
+.result.bad{background:var(--raise);color:var(--ink)}
+
 button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.go:active{transform:none}}
 @media (max-width:360px){.opts{grid-template-columns:1fr}}
@@ -90,6 +95,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     <h1>光アラーム</h1>
     <span class="now" id="now">07:54</span>
   </header>
+
+  <div class="result" id="result" role="status" hidden></div>
 
   <section class="stage" aria-label="1回目の時刻">
     <input id="t" type="time" value="08:00" step="300" aria-label="1回目の時刻">
@@ -164,7 +171,14 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     });
     $("track").innerHTML = html;
 
-    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(times.map(stamp).join(","));
+    // 終わったらこのページに戻ってくる起動方法(x-callback)。戻り先に結果と時刻を付ける
+    const back = location.origin + location.pathname;
+    const info = "&t=" + encodeURIComponent(times.map(hm).join(",")) + "&l=" + encodeURIComponent(hm(ls));
+    $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)
+      +"&input=text&text="+encodeURIComponent(times.map(stamp).join(","))
+      +"&x-success="+encodeURIComponent(back+"?result=ok"+info)
+      +"&x-error="+encodeURIComponent(back+"?result=error")
+      +"&x-cancel="+encodeURIComponent(back+"?result=cancel");
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
 
@@ -173,7 +187,32 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
   document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); } });
 
-  autoDay(); render();
+  // ショートカットから戻ってきたときの結果表示
+  function showResult(){
+    const q = new URLSearchParams(location.search), r = q.get("result");
+    if(!r) return;
+    const box = $("result");
+    if(r === "ok"){
+      const t = q.get("t"), l = q.get("l");
+      box.textContent = "";
+      const h = document.createElement("div"); h.textContent = "セット完了"; h.style.fontWeight = "700";
+      const d = document.createElement("div"); d.style.fontSize = "13px";
+      d.textContent = [l ? "点灯 " + l : "", t ? "アラーム " + t.split(",").join(" / ") : ""].filter(Boolean).join("　");
+      box.append(h, d);
+      box.classList.remove("bad");
+    }else if(r === "cancel"){
+      box.textContent = "セットをやめました";
+      box.classList.add("bad");
+    }else{
+      box.textContent = "セットできませんでした。もう一度お試しください";
+      box.classList.add("bad");
+    }
+    box.hidden = false;
+    try{ history.replaceState(null, "", location.pathname); }catch(e){}
+    setTimeout(() => { box.hidden = true; }, 15000);
+  }
+
+  autoDay(); render(); showResult();
 })();
 </script>
 </body>
