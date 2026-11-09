@@ -136,7 +136,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
 <script>
 (function(){
   // 起動するショートカット名。?sc=名前 で一時的に別のショートカットを試せる
-  const SC = (function(){ try{ return new URLSearchParams(location.search).get("sc") || "光アラームセット(手動)"; }catch(e){ return "光アラームセット(手動)"; } })();
+  const SC = (function(){ try{ return new URLSearchParams(location.search).get("sc") || "☀️"; }catch(e){ return "☀️"; } })();
   const W = ["日","月","火","水","木","金","土"];
   const $ = id => document.getElementById(id);
   const t = $("t");
