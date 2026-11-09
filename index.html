@@ -171,14 +171,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     });
     $("track").innerHTML = html;
 
-    // 終わったらこのページに戻ってくる起動方法(x-callback)。戻り先に結果と時刻を付ける
-    const back = location.origin + location.pathname;
-    const info = "&t=" + encodeURIComponent(times.map(hm).join(",")) + "&l=" + encodeURIComponent(hm(ls));
-    $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)
-      +"&input=text&text="+encodeURIComponent(times.map(stamp).join(","))
-      +"&x-success="+encodeURIComponent(back+"?result=ok"+info)
-      +"&x-error="+encodeURIComponent(back+"?result=error")
-      +"&x-cancel="+encodeURIComponent(back+"?result=cancel");
+    // 起動するだけ(終わったらショートカット側でホーム画面に戻る)
+    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(times.map(stamp).join(","));
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
 
