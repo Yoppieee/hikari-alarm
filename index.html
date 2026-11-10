@@ -190,7 +190,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
         stamp(watch)
       ].join("\n");
     }
-    $("go").href = "shortcuts://run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
+    const CB = encodeURIComponent("clock-alarm://");
+    $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload)+"&x-success="+CB+"&x-error="+CB+"&x-cancel="+CB;
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
 
