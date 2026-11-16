@@ -107,7 +107,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   <div class="result" id="result" role="status" hidden></div>
 
   <section class="next" id="next" aria-live="polite" hidden>
-    <span class="lab"><span>次のアラーム</span><span class="src" id="nextsrc"></span></span>
+    <span class="lab"><span>自動で入るアラーム</span><span class="src" id="nextsrc"></span></span>
     <span class="val" id="nextval"></span>
   </section>
 
@@ -229,7 +229,6 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
         dark ? hue(8, liv2, "groups/81/action", {bri:203, ct:250, transitiontime:6000}) : "-"
       ].join("\n");
     }
-    lastManual = {first: times[0].getTime(), text: (b.getMonth()+1)+"/"+b.getDate()+"("+W[b.getDay()]+") "+times.map(hm).join("/")+"・光"+hm(ls)};
     $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
@@ -237,18 +236,13 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   // 取り消し:☀️に「取消」だけを渡す(manual.txtを空にし、Watch起床の予定を消す。アラームは次の自動実行で入れ替わる)
   $("cancel").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent("取消");
 
-  // 次のアラームの表示。手動はこのページでセットした内容(端末に控える)、自動は plan.txt を読む
-  let lastManual = null;
-  $("go").addEventListener("click", () => { try{ if(lastManual) localStorage.setItem("hikari-manual", JSON.stringify(lastManual)); }catch(e){} setTimeout(showNext, 500); });
-  $("cancel").addEventListener("click", () => { try{ localStorage.removeItem("hikari-manual"); }catch(e){} setTimeout(showNext, 500); });
+  // 自動で入る次のアラーム(plan.txt)を表示する。手動でセットするかどうかの判断材料
   function setNext(src, val, dim){
     $("nextsrc").textContent = src; $("nextval").textContent = val;
     $("nextval").classList.toggle("dim", !!dim); $("next").hidden = false;
   }
   async function showNext(){
     const now = new Date();
-    try{ const m = JSON.parse(localStorage.getItem("hikari-manual")||"null");
-         if(m && m.first > now.getTime()){ setNext("手動", m.text); return; } }catch(e){}
     let lines;
     try{
       const r = await fetch("plan.txt?t="+Date.now(), {cache:"no-store"});
@@ -264,8 +258,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     let fresh = false;
     if(first && first !== "-"){ const f = new Date(first); fresh = !isNaN(f) && f > now; }
     else if(day){ fresh = day > today || (+day === +today && now.getHours() < 12); }
-    if(fresh) setNext("自動", lines[4] || "");
-    else setNext("自動", "明日の分は22時ごろに決まります(決まると表示されます)", true);
+    if(fresh) setNext("", lines[4] || "");
+    else setNext("", "明日の分は22時ごろに決まります(決まると表示されます)", true);
   }
 
   t.addEventListener("input", () => { autoDay(); render(); });
