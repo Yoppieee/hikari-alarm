@@ -1,11 +1,11 @@
 起床(自動)
-2026-11-17T05:10:00+09:00,2026-11-17T05:20:00+09:00
-2026-11-17T05:00:00
-2026-11-17T05:01:00
-11/17(火) 5:10/5:20・光5:00
-2026-11-17T05:08:00+09:00
+2026-11-17T05:17:00+09:00,2026-11-17T05:27:00+09:00
+2026-11-17T05:07:00
+2026-11-17T05:08:00
+11/17(火) 5:17/5:27・光5:07
+2026-11-17T05:15:00+09:00
 -
 -
-schedules/6|{"localtime":"2026-11-17T06:00:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
-schedules/7|{"localtime":"2026-11-17T05:20:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"on":true,"bri":30,"ct":454,"transitiontime":0}}}
-schedules/8|{"localtime":"2026-11-17T05:21:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"bri":203,"ct":250,"transitiontime":6000}}}
+schedules/6|{"localtime":"2026-11-17T06:07:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
+schedules/7|{"localtime":"2026-11-17T05:27:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"on":true,"bri":30,"ct":454,"transitiontime":0}}}
+schedules/8|{"localtime":"2026-11-17T05:28:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"bri":203,"ct":250,"transitiontime":6000}}}
