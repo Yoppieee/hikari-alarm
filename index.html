@@ -84,7 +84,7 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .next{background:var(--panel);border-radius:20px;padding:14px 18px 16px;display:flex;flex-direction:column;gap:4px}
 .next .lab{display:flex;justify-content:space-between;gap:8px}
 .next .src{color:var(--faint);letter-spacing:.08em}
-.next .val{font:500 17px var(--digit);font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.next .val{white-space:pre-line;font:500 17px var(--digit);font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
 .next .val.dim{font:400 13px var(--body);color:var(--mute)}
 
 /* 結果の表示(ショートカットから戻ってきたとき) */
@@ -241,25 +241,40 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     $("nextsrc").textContent = src; $("nextval").textContent = val;
     $("nextval").classList.toggle("dim", !!dim); $("next").hidden = false;
   }
+  async function getLines(name){
+    try{ const r = await fetch(name+"?t="+Date.now(), {cache:"no-store"}); if(!r.ok) return null;
+         return (await r.text()).split("\n").map(x => x.trim()); }catch(e){ return null; }
+  }
   async function showNext(){
     const now = new Date();
-    let lines;
-    try{
-      const r = await fetch("plan.txt?t="+Date.now(), {cache:"no-store"});
-      if(!r.ok) throw 0;
-      lines = (await r.text()).split("\n").map(x => x.trim());
-    }catch(e){ $("next").hidden = true; return; }
     const today = new Date(now); today.setHours(0,0,0,0);
-    const md = (lines[4]||"").match(/^(\d{1,2})\/(\d{1,2})/);
-    let day = null;
-    if(md){ day = new Date(now.getFullYear(), +md[1]-1, +md[2]);
-            if(day - today < -180*86400000) day.setFullYear(day.getFullYear()+1); }
-    const first = (lines[1]||"").split(",")[0];
-    let fresh = false;
-    if(first && first !== "-"){ const f = new Date(first); fresh = !isNaN(f) && f > now; }
-    else if(day){ fresh = day > today || (+day === +today && now.getHours() < 12); }
-    if(fresh) setNext("", lines[4] || "");
-    else setNext("", "明日の分は22時ごろに決まります(決まると表示されます)", true);
+    // 1) 確定:plan.txt(22時ごろ書き出し)がこれからの朝の分なら、それを出す
+    const plan = await getLines("plan.txt");
+    if(plan){
+      const md = (plan[4]||"").match(/^(\d{1,2})\/(\d{1,2})/);
+      let day = null;
+      if(md){ day = new Date(now.getFullYear(), +md[1]-1, +md[2]);
+              if(day - today < -180*86400000) day.setFullYear(day.getFullYear()+1); }
+      const first = (plan[1]||"").split(",")[0];
+      let fresh = false;
+      if(first && first !== "-"){ const f = new Date(first); fresh = !isNaN(f) && f > now; }
+      else if(day){ fresh = day > today || (+day === +today && now.getHours() < 12); }
+      if(fresh){ setNext("確定", plan[4] || ""); return; }
+    }
+    // 2) 見込み:今朝のアラームを過ぎたら、翌日の見込み(forecast.txt。日中に数回更新)を出す
+    const fc = await getLines("forecast.txt");
+    if(fc && /^\d{4}-\d{2}-\d{2}$/.test(fc[0]||"")){
+      const [y,m,d] = fc[0].split("-").map(Number), day = new Date(y, m-1, d);
+      const first = (fc[1]||"").split(",")[0];
+      let ok = day > today;
+      if(+day === +today && first && first !== "-"){ const [hh,mm] = first.split(":").map(Number); const f = new Date(day); f.setHours(hh,mm); ok = f > now; }
+      if(ok){
+        const at = (fc[4]||"").match(/T(\d{2}):(\d{2})/);
+        setNext("見込み"+(at ? "(" + (+at[1]) + ":" + at[2] + "時点)" : ""), (fc[2]||"") + (fc[3] ? "\n" + fc[3] : ""));
+        return;
+      }
+    }
+    setNext("", "明日の見込みはまだ出ていません", true);
   }
 
   t.addEventListener("input", () => { autoDay(); render(); });
