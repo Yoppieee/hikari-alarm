@@ -149,6 +149,20 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   const stamp = d => d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+"T"+p2(d.getHours())+":"+p2(d.getMinutes())+":00+09:00";
   const parts = () => (t.value||"08:00").split(":").map(Number);
 
+  // 東京の日の出時刻(簡易式、誤差1〜2分)。y・m(0始まり)・d は日本時間の日付
+  function sunriseTokyo(y, m, d){
+    const lat = 35.6895, lng = 139.6917, r = Math.PI/180;
+    const n = Math.round(Date.UTC(y, m, d, 12)/86400000 + 2440587.5 - 2451545.0 + 0.0008);
+    const js = n - lng/360;
+    const M = (357.5291 + 0.98560028*js) % 360;
+    const C = 1.9148*Math.sin(M*r) + 0.02*Math.sin(2*M*r) + 0.0003*Math.sin(3*M*r);
+    const lam = (M + C + 180 + 102.9372) % 360;
+    const transit = 2451545.0 + js + 0.0053*Math.sin(M*r) - 0.0069*Math.sin(2*lam*r);
+    const dec = Math.asin(Math.sin(lam*r)*Math.sin(23.4397*r));
+    const w = Math.acos((Math.sin(-0.833*r) - Math.sin(lat*r)*Math.sin(dec)) / (Math.cos(lat*r)*Math.cos(dec)))/r;
+    return new Date((transit - w/360 - 2440587.5)*86400000);
+  }
+
   function autoDay(){
     const [h,m] = parts(), d = new Date(); d.setHours(h,m,0,0);
     state.day = d > new Date() ? 0 : 1;
@@ -173,7 +187,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     $("track").innerHTML = html;
 
     // 起動するだけ(終わったらショートカット側でホーム画面に戻る)
-    // 旧ショートカットには時刻のカンマ区切り、新ショートカットには6行の指示書(plan.txtと同じ形式)を渡す
+    // 旧ショートカットには時刻のカンマ区切り、新ショートカットには11行の指示書(plan.txtと同じ形式。DESIGN.md参照)を渡す
     let payload;
     if(SC === "光アラームセット(手動)"){
       payload = times.map(stamp).join(",");
@@ -181,13 +195,24 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
       const local = d => d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())+"T"+p2(d.getHours())+":"+p2(d.getMinutes())+":00";
       const fade = new Date(b); fade.setMinutes(fade.getMinutes()-9);
       const watch = new Date(b); watch.setMinutes(watch.getMinutes()-2);
+      // 7〜11行目:Hueの追加予約「schedules/番号|送る本文」。鍵は {KEY} と書き、ショートカットが送る直前に置き換える
+      // 手動の日は天気(7)・服装(8)・白に戻す(9)は出さない。リビング(10・11)は、1本目の10分後が日の出より前のときだけ
+      const hue = (no, d, addr, body) => "schedules/"+no+"|"+JSON.stringify({localtime:local(d), status:"enabled", command:{address:"/api/{KEY}/"+addr, method:"PUT", body:body}});
+      const liv1 = new Date(b); liv1.setMinutes(liv1.getMinutes()+10);
+      const liv2 = new Date(b); liv2.setMinutes(liv2.getMinutes()+11);
+      const dark = liv1 < sunriseTokyo(liv1.getFullYear(), liv1.getMonth(), liv1.getDate());
       payload = [
         "起床(手動)",
         times.map(stamp).join(","),
         local(ls),
         local(fade),
         "手動 "+(b.getMonth()+1)+"/"+b.getDate()+"("+W[b.getDay()]+") "+times.map(hm).join("/")+"・光"+hm(ls),
-        stamp(watch)
+        stamp(watch),
+        "-",
+        "-",
+        "-",
+        dark ? hue(7, liv1, "groups/81/action", {on:true, bri:30, ct:454, transitiontime:0}) : "-",
+        dark ? hue(8, liv2, "groups/81/action", {bri:203, ct:250, transitiontime:6000}) : "-"
       ].join("\n");
     }
     $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
