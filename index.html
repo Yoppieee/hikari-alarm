@@ -80,6 +80,13 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .cancel{display:block;text-align:center;text-decoration:none;color:var(--mute);font-size:12.5px;padding:6px 0;letter-spacing:.08em}
 .note{margin:0;font-size:11.5px;color:var(--faint);line-height:1.8}
 
+/* 次のアラーム(何もしなければ鳴る予定) */
+.next{background:var(--panel);border-radius:20px;padding:14px 18px 16px;display:flex;flex-direction:column;gap:4px}
+.next .lab{display:flex;justify-content:space-between;gap:8px}
+.next .src{color:var(--faint);letter-spacing:.08em}
+.next .val{font:500 17px var(--digit);font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;overflow-wrap:anywhere}
+.next .val.dim{font:400 13px var(--body);color:var(--mute)}
+
 /* 結果の表示(ショートカットから戻ってきたとき) */
 .result{border-radius:16px;padding:12px 16px;font-size:14px;font-weight:500;text-align:center;
   background:var(--ember-dim);color:var(--ember)}
@@ -98,6 +105,11 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   </header>
 
   <div class="result" id="result" role="status" hidden></div>
+
+  <section class="next" id="next" aria-live="polite" hidden>
+    <span class="lab"><span>次のアラーム</span><span class="src" id="nextsrc"></span></span>
+    <span class="val" id="nextval"></span>
+  </section>
 
   <section class="stage" aria-label="1回目の時刻">
     <input id="t" type="time" value="08:00" step="300" aria-label="1回目の時刻">
@@ -217,6 +229,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
         dark ? hue(8, liv2, "groups/81/action", {bri:203, ct:250, transitiontime:6000}) : "-"
       ].join("\n");
     }
+    lastManual = {first: times[0].getTime(), text: (b.getMonth()+1)+"/"+b.getDate()+"("+W[b.getDay()]+") "+times.map(hm).join("/")+"・光"+hm(ls)};
     $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
@@ -224,10 +237,41 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   // 取り消し:☀️に「取消」だけを渡す(manual.txtを空にし、Watch起床の予定を消す。アラームは次の自動実行で入れ替わる)
   $("cancel").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent("取消");
 
+  // 次のアラームの表示。手動はこのページでセットした内容(端末に控える)、自動は plan.txt を読む
+  let lastManual = null;
+  $("go").addEventListener("click", () => { try{ if(lastManual) localStorage.setItem("hikari-manual", JSON.stringify(lastManual)); }catch(e){} setTimeout(showNext, 500); });
+  $("cancel").addEventListener("click", () => { try{ localStorage.removeItem("hikari-manual"); }catch(e){} setTimeout(showNext, 500); });
+  function setNext(src, val, dim){
+    $("nextsrc").textContent = src; $("nextval").textContent = val;
+    $("nextval").classList.toggle("dim", !!dim); $("next").hidden = false;
+  }
+  async function showNext(){
+    const now = new Date();
+    try{ const m = JSON.parse(localStorage.getItem("hikari-manual")||"null");
+         if(m && m.first > now.getTime()){ setNext("手動", m.text); return; } }catch(e){}
+    let lines;
+    try{
+      const r = await fetch("plan.txt?t="+Date.now(), {cache:"no-store"});
+      if(!r.ok) throw 0;
+      lines = (await r.text()).split("\n").map(x => x.trim());
+    }catch(e){ $("next").hidden = true; return; }
+    const today = new Date(now); today.setHours(0,0,0,0);
+    const md = (lines[4]||"").match(/^(\d{1,2})\/(\d{1,2})/);
+    let day = null;
+    if(md){ day = new Date(now.getFullYear(), +md[1]-1, +md[2]);
+            if(day - today < -180*86400000) day.setFullYear(day.getFullYear()+1); }
+    const first = (lines[1]||"").split(",")[0];
+    let fresh = false;
+    if(first && first !== "-"){ const f = new Date(first); fresh = !isNaN(f) && f > now; }
+    else if(day){ fresh = day > today || (+day === +today && now.getHours() < 12); }
+    if(fresh) setNext("自動", lines[4] || "");
+    else setNext("自動", "明日の分は22時ごろに決まります(決まると表示されます)", true);
+  }
+
   t.addEventListener("input", () => { autoDay(); render(); });
   $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
   $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
-  document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); } });
+  document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); showNext(); } });
 
   // ショートカットから戻ってきたときの結果表示
   function showResult(){
@@ -254,7 +298,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     setTimeout(() => { box.hidden = true; }, 15000);
   }
 
-  autoDay(); render(); showResult();
+  autoDay(); render(); showResult(); showNext();
 })();
 </script>
 </body>
