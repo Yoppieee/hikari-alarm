@@ -77,6 +77,7 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .go{display:block;text-align:center;text-decoration:none;border-radius:20px;padding:18px 0;
   font:700 17px var(--body);letter-spacing:.4em;text-indent:.4em;color:var(--night);background:var(--ember)}
 .go:active{transform:translateY(1px) scale(.995)}
+.cancel{display:block;text-align:center;text-decoration:none;color:var(--mute);font-size:12.5px;padding:6px 0;letter-spacing:.08em}
 .note{margin:0;font-size:11.5px;color:var(--faint);line-height:1.8}
 
 /* 結果の表示(ショートカットから戻ってきたとき) */
@@ -131,6 +132,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   </section>
 
   <a class="go" id="go" href="#">セット</a>
+  <a class="cancel" id="cancel" href="#">手動のセットを取り消して自動に戻す</a>
 </div>
 
 <script>
@@ -218,6 +220,9 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     $("go").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent(payload);
     try{ localStorage.setItem("hikari-alarm", JSON.stringify({count:state.count,gap:state.gap,time:t.value})); }catch(e){}
   }
+
+  // 取り消し:☀️に「取消」だけを渡す(manual.txtを空にし、Watch起床の予定を消す。アラームは次の自動実行で入れ替わる)
+  $("cancel").href = "shortcuts://x-callback-url/run-shortcut?name="+encodeURIComponent(SC)+"&input=text&text="+encodeURIComponent("取消");
 
   t.addEventListener("input", () => { autoDay(); render(); });
   $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
