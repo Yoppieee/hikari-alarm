@@ -1,11 +1,11 @@
 起床(自動)
-2026-11-18T07:26:00+09:00,2026-11-18T07:36:00+09:00
-2026-11-18T07:16:00
-2026-11-18T07:17:00
-11/18(水) 7:26/7:36・光7:16
-2026-11-18T07:24:00+09:00
-schedules/4|{"localtime":"2026-11-18T07:26:00","status":"enabled","command":{"address":"/api/{KEY}/lights/11/state","method":"PUT","body":{"on":true,"bri":200,"xy":[0.16,0.10]}}}
-schedules/5|{"localtime":"2026-11-18T07:26:00","status":"enabled","command":{"address":"/api/{KEY}/lights/9/state","method":"PUT","body":{"on":true,"bri":200,"ct":250}}}
-schedules/6|{"localtime":"2026-11-18T08:46:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
+2026-11-19T07:00:00+09:00,2026-11-19T07:10:00+09:00,2026-11-19T07:20:00+09:00
+2026-11-19T06:50:00
+2026-11-19T06:51:00
+11/19(木) 7:00/7:10/7:20・光6:50
+2026-11-19T06:58:00+09:00
+-
+-
+schedules/6|{"localtime":"2026-11-19T08:00:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
 -
 -
