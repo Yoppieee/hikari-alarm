@@ -220,7 +220,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
       const fade = new Date(b); fade.setMinutes(fade.getMinutes()-9);
       const watch = new Date(b); watch.setMinutes(watch.getMinutes()-2);
       // 7〜11行目:Hueの追加予約「schedules/番号|送る本文」。鍵は {KEY} と書き、ショートカットが送る直前に置き換える
-      // 天気(7)・服装(8):weather.txt(夜のタスクが書く自宅の天気・服装の判定)にこの日の行があれば、1本目の時刻に色を変える
+      // 天気(7)・服装(8):weather.txt(夜のタスクが書く自宅の天気・服装の判定)にこの日の行があれば、1本目の5分前から5分かけて色を変える
       // 白に戻す(9):7か8を出すときだけ、1本目の60分後。リビング(10・11)は、1本目の10分後が日の出より前のときだけ
       const hue = (no, d, addr, body) => "schedules/"+no+"|"+JSON.stringify({localtime:local(d), status:"enabled", command:{address:"/api/{KEY}/"+addr, method:"PUT", body:body}});
       const liv1 = new Date(b); liv1.setMinutes(liv1.getMinutes()+10);
@@ -231,6 +231,9 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
       const CLB = {"厚手":{on:true,bri:200,xy:[0.25,0.10]}, "一枚多く":{on:true,bri:200,xy:[0.30,0.20]}, "いつも通り":{on:true,bri:200,ct:250}, "一枚減らす":{on:true,bri:200,xy:[0.45,0.47]}, "薄着":{on:true,bri:200,xy:[0.57,0.40]}};
       const wb = wx && WXB[wx[0]], cb = wx && CLB[wx[1]];
       const back = new Date(b); back.setMinutes(back.getMinutes()+60);
+      // 天気・服装は1本目の5分前から5分かけて色を変える(朝焼けの白への移り変わりの途中から、その電球だけ目的の色へ)
+      const pre = new Date(b); pre.setMinutes(pre.getMinutes()-5);
+      const tt = o => Object.assign({}, o, {transitiontime:3000});
       payload = [
         "起床(手動)",
         times.map(stamp).join(","),
@@ -238,8 +241,8 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
         local(fade),
         "手動 "+(b.getMonth()+1)+"/"+b.getDate()+"("+W[b.getDay()]+") "+times.map(hm).join("/")+"・光"+hm(ls),
         stamp(watch),
-        wb ? hue(4, b, "lights/11/state", wb) : "-",
-        cb ? hue(5, b, "lights/9/state", cb) : "-",
+        wb ? hue(4, pre, "lights/11/state", tt(wb)) : "-",
+        cb ? hue(5, pre, "lights/9/state", tt(cb)) : "-",
         (wb || cb) ? hue(6, back, "groups/1/action", {ct:300}) : "-",
         dark ? hue(7, liv1, "groups/81/action", {on:true, bri:30, ct:454, transitiontime:0}) : "-",
         dark ? hue(8, liv2, "groups/81/action", {bri:203, ct:250, transitiontime:6000}) : "-"
