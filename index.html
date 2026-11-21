@@ -198,7 +198,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
     pick($("cnt"), state.count); pick($("gap"), state.gap);
     $("gap").querySelectorAll("button").forEach(b => b.disabled = state.count===1);
 
-    const [h,m] = parts(), b = new Date(); b.setSeconds(0,0); b.setHours(h,m); b.setDate(b.getDate()+state.day);
+    const [h,m] = parts(), b = new Date(); b.setSeconds(0,0); b.setHours(h,m-m%5); b.setDate(b.getDate()+state.day);
     $("datel").textContent = (b.getMonth()+1)+"月"+b.getDate()+"日("+W[b.getDay()]+")";
     const times = [];
     for(let i=0;i<state.count;i++){ const x = new Date(b); x.setMinutes(x.getMinutes()+i*state.gap); times.push(x); }
