@@ -41,11 +41,12 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .days{display:flex;gap:6px;align-self:center;background:var(--night);border:1px solid var(--line);border-radius:999px;padding:3px}
 .chip{border:0;background:transparent;color:var(--mute);border-radius:999px;padding:6px 18px;font:500 13px var(--body);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--ember);color:var(--night)}
-#t{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--ink);
-  font:200 clamp(56px,17vw,80px)/1.05 var(--digit);text-align:center;width:100%;padding:6px 0 0;
-  letter-spacing:-.04em;font-variant-numeric:tabular-nums;cursor:pointer}
-#t::-webkit-date-and-time-value{text-align:center}
-#t::-webkit-calendar-picker-indicator{display:none}
+#t{display:flex;justify-content:center;align-items:baseline;color:var(--ink);padding:6px 0 0;
+  font:200 clamp(56px,17vw,80px)/1.05 var(--digit);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+#t select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;
+  letter-spacing:inherit;cursor:pointer;padding:0;text-align:center;text-align-last:center}
+#t #th{direction:rtl}
+#t option{font-size:18px;color:#000}
 .datel{text-align:center;color:var(--mute);font-size:13px;letter-spacing:.12em}
 
 /* 設定 */
@@ -92,7 +93,7 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
   background:var(--ember-dim);color:var(--ember)}
 .result.bad{background:var(--raise);color:var(--ink)}
 
-button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.go:active{transform:none}}
 @media (max-width:360px){.opts{grid-template-columns:1fr}}
 </style>
@@ -112,7 +113,7 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   </section>
 
   <section class="stage" aria-label="1回目の時刻">
-    <input id="t" type="time" value="08:00" step="300" aria-label="1回目の時刻">
+    <div id="t" role="group" aria-label="1回目の時刻"><select id="th" aria-label="時"></select><span class="colon">:</span><select id="tm" aria-label="分"></select></div>
     <div class="datel" id="datel">10月29日(木)</div>
   </section>
 
@@ -153,7 +154,15 @@ button:focus-visible,#t:focus-visible,.go:focus-visible{outline:2px solid var(--
   const SC = (function(){ try{ const q = new URLSearchParams(location.search).get("sc"); return (!q || q === "目覚ましセット") ? "☀️" : q; }catch(e){ return "☀️"; } })();
   const W = ["日","月","火","水","木","金","土"];
   const $ = id => document.getElementById(id);
-  const t = $("t");
+  const th = $("th"), tm = $("tm");
+  for(let h=0;h<24;h++) th.add(new Option(String(h), String(h)));
+  for(let m=0;m<60;m+=5) tm.add(new Option(String(m).padStart(2,"0"), String(m)));
+  const t = {
+    get value(){ return String(th.value).padStart(2,"0")+":"+String(tm.value).padStart(2,"0"); },
+    set value(v){ const [h,m] = String(v).split(":").map(Number); if(isNaN(h)||isNaN(m)) return; th.value = String(h); tm.value = String(m-m%5); },
+    addEventListener(e,f){ th.addEventListener("change",f); tm.addEventListener("change",f); }
+  };
+  t.value = "08:00";
   const state = {day:1, count:3, gap:10};
   try{ const s = JSON.parse(localStorage.getItem("hikari-alarm")||"null");
        if(s){ state.count = s.count||3; state.gap = s.gap||10; if(s.time) t.value = s.time; } }catch(e){}
