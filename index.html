@@ -134,6 +134,13 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
         <button type="button" data-v="15">15</button>
       </div>
     </div>
+    <div class="opt" style="grid-column:1/-1">
+      <span class="lab">1回目</span>
+      <div class="seg" id="first" role="group" aria-label="1回目の鳴らし方">
+        <button type="button" data-v="0" aria-pressed="true">ウォッチ振動</button>
+        <button type="button" data-v="1">いきなり鳴らす</button>
+      </div>
+    </div>
   </div>
 
   <section class="plan" aria-live="polite">
@@ -163,7 +170,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
     addEventListener(e,f){ th.addEventListener("change",f); tm.addEventListener("change",f); }
   };
   t.value = "08:00";
-  const state = {day:1, count:3, gap:10};
+  const state = {day:1, count:3, gap:10, ippatsu:0};
   try{ const s = JSON.parse(localStorage.getItem("hikari-alarm")||"null");
        if(s){ state.count = s.count||3; state.gap = s.gap||10; if(s.time) t.value = s.time; } }catch(e){}
 
@@ -204,7 +211,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
   function render(){
     const n = new Date(); $("now").textContent = String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
-    pick($("cnt"), state.count); pick($("gap"), state.gap);
+    pick($("cnt"), state.count); pick($("gap"), state.gap); pick($("first"), state.ippatsu);
     $("gap").querySelectorAll("button").forEach(b => b.disabled = state.count===1);
 
     const [h,m] = parts(), b = new Date(); b.setSeconds(0,0); b.setHours(h,m-m%5); b.setDate(b.getDate()+state.day);
@@ -215,7 +222,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
     let html = '<div class="step light"><span class="tm">'+hm(ls)+'</span><span class="what">点灯</span></div>';
     times.forEach((x,i) => {
-      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">'+(i===0?'ウォッチ振動':'アラーム')+'</span></div>';
+      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">'+(i===0 && !state.ippatsu ?'ウォッチ振動':'アラーム')+'</span></div>';
     });
     $("track").innerHTML = html;
 
@@ -244,7 +251,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
       const pre = new Date(b); pre.setMinutes(pre.getMinutes()-5);
       const tt = o => Object.assign({}, o, {transitiontime:3000});
       payload = [
-        "起床(手動)",
+        (state.ippatsu ? "起床(手動・一発)" : "起床(手動)"),
         times.map(stamp).join(","),
         local(ls),
         local(fade),
@@ -307,6 +314,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
   t.addEventListener("input", () => { autoDay(); render(); });
   $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
+  $("first").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.ippatsu=+b.dataset.v; render(); }});
   $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
   document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); showNext(); loadWx(); } });
 
