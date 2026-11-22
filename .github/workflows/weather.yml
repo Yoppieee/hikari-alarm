@@ -1,0 +1,25 @@
+name: 天気データの取得
+on:
+  schedule:
+    - cron: "41 12 * * *"   # 21:41 JST(22:07の書き出し用)
+    - cron: "23 14 * * *"   # 23:23 JST(23:50の見張り用)
+    - cron: "17 2 * * *"    # 11:17 JST(予備)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: weather
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/fetch_weather.py
+      - name: commit
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jma
+          git diff --cached --quiet && exit 0
+          git commit -m "天気データを更新"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && break; sleep 5; done
