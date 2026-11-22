@@ -140,7 +140,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
     <span class="lab">朝の流れ</span>
     <div class="track" id="track">
       <div class="step light"><span class="tm">7:50</span><span class="what">点灯</span></div>
-      <div class="step ring"><span class="tm">8:00</span><span class="what">アラーム</span></div>
+      <div class="step ring"><span class="tm">8:00</span><span class="what">ウォッチ振動</span></div>
     </div>
   </section>
 
@@ -215,7 +215,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
     let html = '<div class="step light"><span class="tm">'+hm(ls)+'</span><span class="what">点灯</span></div>';
     times.forEach((x,i) => {
-      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">アラーム</span></div>';
+      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">'+(i===0?'ウォッチ振動':'アラーム')+'</span></div>';
     });
     $("track").innerHTML = html;
 
