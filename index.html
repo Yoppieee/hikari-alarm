@@ -73,6 +73,7 @@ h1{margin:0;font-size:13px;font-weight:700;letter-spacing:.32em;color:var(--embe
 .step .tm{font:500 19px var(--digit);font-variant-numeric:tabular-nums;min-width:4.2em}
 .step.light .tm{color:var(--ember)}
 .step .what{font-size:12px;color:var(--mute)}
+.step .mode{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;color:var(--ink);cursor:pointer}
 
 /* セット */
 .go{display:block;text-align:center;text-decoration:none;border-radius:20px;padding:18px 0;
@@ -132,13 +133,6 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
         <button type="button" data-v="5">5</button>
         <button type="button" data-v="10" aria-pressed="true">10</button>
         <button type="button" data-v="15">15</button>
-      </div>
-    </div>
-    <div class="opt" style="grid-column:1/-1">
-      <span class="lab">1回目</span>
-      <div class="seg" id="first" role="group" aria-label="1回目の鳴らし方">
-        <button type="button" data-v="0" aria-pressed="true">ウォッチ振動</button>
-        <button type="button" data-v="1">いきなり鳴らす</button>
       </div>
     </div>
   </div>
@@ -211,7 +205,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
   function render(){
     const n = new Date(); $("now").textContent = String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
-    pick($("cnt"), state.count); pick($("gap"), state.gap); pick($("first"), state.ippatsu);
+    pick($("cnt"), state.count); pick($("gap"), state.gap);
     $("gap").querySelectorAll("button").forEach(b => b.disabled = state.count===1);
 
     const [h,m] = parts(), b = new Date(); b.setSeconds(0,0); b.setHours(h,m-m%5); b.setDate(b.getDate()+state.day);
@@ -222,7 +216,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
     let html = '<div class="step light"><span class="tm">'+hm(ls)+'</span><span class="what">点灯</span></div>';
     times.forEach((x,i) => {
-      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span><span class="what">'+(i===0 && !state.ippatsu ?'ウォッチ振動':'アラーム')+'</span></div>';
+      html += '<div class="step ring"><span class="tm">'+hm(x)+'</span>'+(i===0 ? '<button type="button" class="what mode" aria-label="1回目の鳴らし方を切り替える">'+(state.ippatsu?'いきなりアラーム':'ウォッチ振動')+' ⇄</button>' : '<span class="what">アラーム</span>')+'</div>';
     });
     $("track").innerHTML = html;
 
@@ -314,7 +308,7 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
 
   t.addEventListener("input", () => { autoDay(); render(); });
   $("cnt").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.count=+b.dataset.v; render(); }});
-  $("first").addEventListener("click", e => { const b=e.target.closest("button"); if(b){ state.ippatsu=+b.dataset.v; render(); }});
+  $("track").addEventListener("click", e => { if(e.target.closest(".mode")){ state.ippatsu = state.ippatsu ? 0 : 1; render(); }});
   $("gap").addEventListener("click", e => { const b=e.target.closest("button"); if(b && !b.disabled){ state.gap=+b.dataset.v; render(); }});
   document.addEventListener("visibilitychange", () => { if(!document.hidden){ autoDay(); render(); showNext(); loadWx(); } });
 
