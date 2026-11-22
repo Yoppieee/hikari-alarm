@@ -1,5 +1,5 @@
 # 気象庁の予報JSONと東京の日ごとの気温実績を取ってきて data/jma/ に保存する(GitHub Actions用)
-import json, os, sys, csv, datetime, urllib.request
+import json, os, sys, csv, time, datetime, urllib.request
 from html.parser import HTMLParser
 
 OUT = "data/jma"
@@ -66,11 +66,22 @@ def daily(y, m):
 def main():
     os.makedirs(OUT, exist_ok=True)
     ok = True
-    for c in OFFICES:
+    # 全国の府県予報区(出張先用)。一覧が取れなければ固定の8か所だけ
+    codes = list(OFFICES)
+    try:
+        area = json.loads(get("https://www.jma.go.jp/bosai/common/const/area.json"))
+        offices = {c: v.get("name", "") for c, v in area.get("offices", {}).items()}
+        with open(f"{OUT}/offices.json", "w", encoding="utf-8") as f:
+            json.dump(offices, f, ensure_ascii=False, indent=0, sort_keys=True)
+        codes += [c for c in sorted(offices) if c not in codes]
+    except Exception as e:
+        print("area list failed:", e, file=sys.stderr)
+    for c in codes:
+        time.sleep(0.3)
         try:
             data = json.loads(get(f"https://www.jma.go.jp/bosai/forecast/data/forecast/{c}.json"))
             with open(f"{OUT}/forecast-{c}.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=1)
+                json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
         except Exception as e:
             print("forecast", c, "failed:", e, file=sys.stderr)
             if c == "130000":
