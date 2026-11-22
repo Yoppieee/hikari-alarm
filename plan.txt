@@ -4,8 +4,8 @@
 2026-11-23T13:46:00
 11/23(月) 13:55/14:05・光13:45
 2026-11-23T13:53:00+09:00
--
--
+schedules/4|{"localtime":"2026-11-23T13:50:00","status":"enabled","command":{"address":"/api/{KEY}/lights/11/state","method":"PUT","body":{"on":true,"bri":200,"xy":[0.52,0.43],"transitiontime":3000}}}
+schedules/5|{"localtime":"2026-11-23T13:50:00","status":"enabled","command":{"address":"/api/{KEY}/lights/9/state","method":"PUT","body":{"on":true,"bri":200,"xy":[0.30,0.20],"transitiontime":3000}}}
 schedules/6|{"localtime":"2026-11-23T14:45:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
 -
 -
