@@ -98,10 +98,10 @@
 
 ## 天気データの取得をGitHub Actionsへ(2026-11-22)
 - 11/22夜、22:07の書き出しで気象庁ページのWebFetchが「許可待ちの時間切れ」で止まった(夜の自動実行では許可を出す人がいない)。サイトを変えても同じため、Webを読む処理をClaudeのタスクから外した
-- `.github/workflows/weather.yml`(天気データの取得)が毎日21:41・23:23・11:17(日本時間)に `tools/fetch_weather.py` を動かし、気象庁の予報JSON(全国の府県予報区。出張先用。一覧は `data/jma/offices.json`)と東京の日ごとの最高・最低気温(直近14日)を `data/jma/` に保存してコミットする
+- `.github/workflows/weather.yml`(天気データの取得)が毎時(2026-11-24から。毎日3回の指定では遅れや取りこぼしが多かったため)に `tools/fetch_weather.py` を動かし、気象庁の予報JSON(全国の府県予報区。出張先用。一覧は `data/jma/offices.json`)と東京の日ごとの最高・最低気温(直近14日)を `data/jma/` に保存してコミットする
   - `data/jma/forecast-<府県コード>.json`:気象庁の予報JSONそのまま
   - `data/jma/tokyo-daily.csv`:`date,max,min`(前日まで)
-  - `data/jma/fetched_at.txt`:取得時刻
+  - `data/jma/fetched_at.txt`:中身が最後に変わったときの取得時刻(変化がない回はコミットしない)
 - 22:07の書き出しと23:50の見張りは、クローンした `data/jma/` を読むだけ。取得時刻が当日でなければ「天気データが古い(GitHub Actionsを確認)」と報告する
 
 ## 手動の判定の不具合と修正(2026-11-23)
