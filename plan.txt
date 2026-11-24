@@ -1,11 +1,11 @@
 起床(自動)
-2026-11-24T07:00:00+09:00,2026-11-24T07:10:00+09:00,2026-11-24T07:20:00+09:00
-2026-11-24T06:50:00
-2026-11-24T06:51:00
-11/24(火) 7:00/7:10/7:20・光6:50
-2026-11-24T06:58:00+09:00
-schedules/4|{"localtime":"2026-11-24T06:55:00","status":"enabled","command":{"address":"/api/{KEY}/lights/11/state","method":"PUT","body":{"on":true,"bri":200,"xy":[0.16,0.10],"transitiontime":3000}}}
-schedules/5|{"localtime":"2026-11-24T06:55:00","status":"enabled","command":{"address":"/api/{KEY}/lights/9/state","method":"PUT","body":{"on":true,"bri":200,"ct":250,"transitiontime":3000}}}
-schedules/6|{"localtime":"2026-11-24T08:00:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
+2026-11-25T07:00:00+09:00,2026-11-25T07:10:00+09:00,2026-11-25T07:20:00+09:00
+2026-11-25T06:50:00
+2026-11-25T06:51:00
+11/25(水) 7:00/7:10/7:20・光6:50
+2026-11-25T06:58:00+09:00
+schedules/4|{"localtime":"2026-11-25T06:55:00","status":"enabled","command":{"address":"/api/{KEY}/lights/11/state","method":"PUT","body":{"on":true,"bri":200,"xy":[0.52,0.43],"transitiontime":3000}}}
+schedules/5|{"localtime":"2026-11-25T06:55:00","status":"enabled","command":{"address":"/api/{KEY}/lights/9/state","method":"PUT","body":{"on":true,"bri":200,"ct":250,"transitiontime":3000}}}
+schedules/6|{"localtime":"2026-11-25T08:00:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
 -
 -
