@@ -237,8 +237,8 @@ button:focus-visible,#t select:focus-visible,.go:focus-visible{outline:2px solid
       const liv2 = new Date(b); liv2.setMinutes(liv2.getMinutes()+11);
       const dark = liv1 < sunriseTokyo(liv1.getFullYear(), liv1.getMonth(), liv1.getDate());
       const wx = wxFor(b);
-      const WXB = {"晴れ":{on:true,bri:200,xy:[0.52,0.43]}, "曇り":{on:true,bri:200,ct:250}, "雨":{on:true,bri:200,xy:[0.16,0.10]}, "雪":{on:true,bri:200,xy:[0.40,0.23]}};
-      const CLB = {"厚手":{on:true,bri:200,xy:[0.25,0.10]}, "一枚多く":{on:true,bri:200,xy:[0.30,0.20]}, "いつも通り":{on:true,bri:200,ct:250}, "一枚減らす":{on:true,bri:200,xy:[0.45,0.47]}, "薄着":{on:true,bri:200,xy:[0.57,0.40]}};
+      const WXB = {"晴れ":{on:true,bri:200,hue:7235,sat:201}, "曇り":{on:true,bri:200,ct:250}, "雨":{on:true,bri:200,hue:42216,sat:188}, "雪":{on:true,bri:200,hue:57249,sat:123}};
+      const CLB = {"厚手":{on:true,bri:200,hue:49552,sat:217}, "一枚多く":{on:true,bri:200,hue:49580,sat:111}, "いつも通り":{on:true,bri:200,ct:250}, "一枚減らす":{on:true,bri:200,hue:9644,sat:172}, "薄着":{on:true,bri:200,hue:6028,sat:222}};
       const wb = wx && WXB[wx[0]], cb = wx && CLB[wx[1]];
       const back = new Date(b); back.setMinutes(back.getMinutes()+60);
       // 天気・服装は1本目の5分前から5分かけて色を変える(朝焼けの白への移り変わりの途中から、その電球だけ目的の色へ)
