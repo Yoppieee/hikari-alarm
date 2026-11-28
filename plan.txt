@@ -1,11 +1,11 @@
 起床(自動)
-2026-11-28T06:05:00+09:00,2026-11-28T06:15:00+09:00
-2026-11-28T05:55:00
-2026-11-28T05:56:00
-11/28(土) 6:05/6:15・光5:55
-2026-11-28T06:03:00+09:00
-schedules/4|{"localtime":"2026-11-28T06:00:00","status":"enabled","command":{"address":"/api/{KEY}/lights/11/state","method":"PUT","body":{"on":true,"bri":200,"hue":42216,"sat":188,"transitiontime":3000}}}
-schedules/5|{"localtime":"2026-11-28T06:00:00","status":"enabled","command":{"address":"/api/{KEY}/lights/9/state","method":"PUT","body":{"on":true,"bri":200,"hue":9644,"sat":172,"transitiontime":3000}}}
-schedules/6|{"localtime":"2026-11-28T06:55:00","status":"enabled","command":{"address":"/api/{KEY}/groups/1/action","method":"PUT","body":{"ct":300}}}
-schedules/7|{"localtime":"2026-11-28T06:15:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"on":true,"bri":30,"ct":454,"transitiontime":0}}}
-schedules/8|{"localtime":"2026-11-28T06:16:00","status":"enabled","command":{"address":"/api/{KEY}/groups/81/action","method":"PUT","body":{"bri":203,"ct":250,"transitiontime":6000}}}
+-
+-
+-
+11/29(日) 目覚ましなし
+-
+-
+-
+-
+-
+-
